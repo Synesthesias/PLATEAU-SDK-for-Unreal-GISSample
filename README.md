@@ -4,7 +4,7 @@
 [PLATEAU SDK for Unity](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Uniy)向けサンプルプロジェクトは[こちら](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unity-Samples)で公開しています。
 
 ## 動作環境
-- Unreal Engine 5.0.3
+- Unreal Engine 5.3.2
 
 ## 導入
 - [Releaseページ](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal-Samples/releases)から最新版を選択します。
