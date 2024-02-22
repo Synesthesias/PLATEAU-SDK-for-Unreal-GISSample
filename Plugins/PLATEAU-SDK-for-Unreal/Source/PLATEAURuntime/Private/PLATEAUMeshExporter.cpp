@@ -16,14 +16,15 @@
 #include "Engine/StaticMesh.h"
 #include "StaticMeshResources.h"
 #include "UObject/UObjectBaseUtility.h"
+#include "Algo/Reverse.h"
+
+#if WITH_EDITOR
 #include "HAL/FileManager.h"
 #include "filesystem"
 #include "EditorFramework/AssetImportData.h"
-#include "HAL/FileManager.h"
-#include "Algo/Reverse.h"
-using namespace plateau::polygonMesh;
+#endif
 
-#if WITH_EDITOR
+using namespace plateau::polygonMesh;
 
 namespace {
     /**
@@ -86,7 +87,12 @@ bool FPLATEAUMeshExporter::ExportAsOBJ(const FString& ExportPath, APLATEAUInstan
     for (int i = 0; i < ModelDataArray.Num(); i++) {
         if (ModelDataArray[i]->getRootNodeCount() != 0) {
             const FString ExportPathWithName = ExportPath + "/" + ModelNames[i] + ".obj";
-            if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i])) {
+            try {
+                if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i])) {
+                    return false;
+                }
+            }catch (const std::exception& e) {
+                UE_LOG(LogTemp, Error, TEXT("ExportAsOBJ Error : %s"), *FString(e.what()));
                 return false;
             }
         }
@@ -103,11 +109,17 @@ bool FPLATEAUMeshExporter::ExportAsFBX(const FString& ExportPath, APLATEAUInstan
     }
     plateau::meshWriter::FbxWriteOptions FbxOptions;
     FbxOptions.file_format = Option.bExportAsBinary ? plateau::meshWriter::FbxFileFormat::Binary : plateau::meshWriter::FbxFileFormat::ASCII;
+    FbxOptions.coordinate_system = static_cast<plateau::geometry::CoordinateSystem>(Option.CoordinateSystem);
     const auto ModelDataArray = CreateModelFromActor(ModelActor, Option);
     for (int i = 0; i < ModelDataArray.Num(); i++) {
         if (ModelDataArray[i]->getRootNodeCount() != 0) {
             const FString ExportPathWithName = ExportPath + "/" + ModelNames[i] + ".fbx";
-            if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i], FbxOptions)) {
+            try {
+                if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i], FbxOptions)) {
+                    return false;
+                }
+            }catch (const std::exception& e) {
+                UE_LOG(LogTemp, Error, TEXT("ExportAsFBX Error : %s"), *FString(e.what()));
                 return false;
             }
         }
@@ -124,9 +136,15 @@ bool FPLATEAUMeshExporter::ExportAsGLTF(const FString& ExportPath, APLATEAUInsta
         if (ModelDataArray[i]->getRootNodeCount() != 0) {
             const FString ExportPathWithName = ExportPath + "/" + ModelNames[i] + "/" + ModelNames[i] + ".gltf";
             const FString ExportPathWithFolder = ExportPath + "/" + ModelNames[i];
-
+#if WITH_EDITOR
             std::filesystem::create_directory(TCHAR_TO_UTF8(*ExportPathWithFolder));
-            if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i], GltfOptions)) {
+#endif
+            try {
+                if (!Writer.write(TCHAR_TO_UTF8(*ExportPathWithName), *ModelDataArray[i], GltfOptions)) {
+                    return false;
+                }
+            }catch (const std::exception& e) {
+                UE_LOG(LogTemp, Error, TEXT("ExportAsGLTF Error : %s"), *FString(e.what()));
                 return false;
             }
         }
@@ -209,13 +227,26 @@ void FPLATEAUMeshExporter::CreateMesh(plateau::polygonMesh::Mesh& OutMesh, UScen
             Vertex = TVec3d(VertexPosition.X, VertexPosition.Y, VertexPosition.Z);
         Vertex = GeoRef.convertAxisToENU(plateau::geometry::CoordinateSystem::ESU, Vertex);
         Vertex = GeoRef.convertAxisFromENUTo(StaticCast<plateau::geometry::CoordinateSystem>(Option.CoordinateSystem), Vertex);
+
+        // glTFの場合はm単位で出力
+        if (Option.FileFormat == EMeshFileFormat::GLTF)
+            Vertex = TVec3d(Vertex.x * 0.01f, Vertex.y * 0.01f, Vertex.z * 0.01f);
+
         Vertices.push_back(Vertex);
     }
 
+    bool invertMesh = (Option.CoordinateSystem == ECoordinateSystem::EUN || Option.CoordinateSystem == ECoordinateSystem::ESU);
     for (int32 TriangleIndex = 0; TriangleIndex < RenderMesh.IndexBuffer.GetNumIndices() / 3; ++TriangleIndex) {
-        OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3));
-        OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 1));
-        OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 2));
+        if (!invertMesh) {
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3));
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 1));
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 2));
+        }
+        else {
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 2));
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3 + 1));
+            OutIndices.push_back(RenderMesh.IndexBuffer.GetIndex(TriangleIndex * 3));
+        }
     }
 
     for (int k = 0; k < RenderMesh.Sections.Num(); k++) {
@@ -242,6 +273,7 @@ void FPLATEAUMeshExporter::CreateMesh(plateau::polygonMesh::Mesh& OutMesh, UScen
                     FMaterialParameterMetadata MetaData;
                     MaterialInstance->TextureParameterValues[0].GetValue(MetaData);
                     if (const auto Texture = MetaData.Value.Texture; Texture != nullptr) {
+#if WITH_EDITOR
                         const auto TextureSourceFiles = Texture->AssetImportData->GetSourceData().SourceFiles;
                         if (TextureSourceFiles.Num() == 0) {
                             UE_LOG(LogTemp, Error, TEXT("SourceFilePath is missing in AssetImportData: %s"), *Texture->GetName());
@@ -254,6 +286,7 @@ void FPLATEAUMeshExporter::CreateMesh(plateau::polygonMesh::Mesh& OutMesh, UScen
                         const auto AssetBasePath = FPaths::GetPath(Texture->GetPackage()->GetLoadedPath().GetLocalFullPath());
                         const auto TextureFileRelativePath = TextureSourceFiles[0].RelativeFilename;
                         TextureFilePath = AssetBasePath / TextureFileRelativePath;
+#endif
                     }
                 }
             }
@@ -354,4 +387,3 @@ std::shared_ptr<plateau::polygonMesh::Model> FPLATEAUMeshExporter::CreateModelFr
     }
     return OutModel;
 }
-#endif

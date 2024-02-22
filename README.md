@@ -6,10 +6,10 @@
 ## 動作環境
 - Unreal Engine 5.3.2
 
-## 導入
+<!-- ## 導入 ！URLが違うのでコメントアウト中！
 - [Releaseページ](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal-Samples/releases)から最新版を選択します。
 - 掲載されているサンプルプロジェクトをダウンロードします。
-- 圧縮ファイルを展開して、PLATEAUUnrealSamples.uprojectを開きます。
+- 圧縮ファイルを展開して、PLATEAUUnrealSamples.uprojectを開きます。 -->
 
 ## GISSample
 ![](/README_Images/GISSample.png)
