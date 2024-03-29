@@ -3,7 +3,7 @@
 ## 概要
 ![](/README_Images/GISSample.png)
 
-このリポジトリでは、[PLATEAU SDK for Unreal](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal)でどのような属性情報にアクセスできるかについて知るためのチュートリアルとして、GISサンプルアプリを提供しています。GISサンプルアプリでは、PLATEAUの3D都市モデルのさまざまな属性情報の表示や、属性情報に応じたフィルタリング・色分けができます。
+このリポジトリでは、[PLATEAU SDK for Unreal](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal)を利用してどのようなアプリケーションを作成できるかについて知るためのチュートリアルとして、GISサンプルアプリを提供しています。GISサンプルアプリでは、PLATEAUの3D都市モデルのさまざまな属性情報の表示や、属性情報に応じたフィルタリング・色分けができます。
 
 ## 動作環境
 - Unreal Engine 5.3.2
@@ -13,7 +13,7 @@
 #### ビルド済みのアプリを利用する場合
 - [リリースページ](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal-GISSample/releases)からアプリケーションをダウンロードできます。
 #### プロジェクトファイルを利用する場合
-- 本GitHubからUnityプロジェクトをダウンロードし、Unreal Engine 5で開きます。
+- 本GitHubからUnrealプロジェクトをダウンロードし、Unreal Engine 5で開きます。
 - `Content/GISSample/GISSample_Map.umap`を開き、再生することでサンプルを実行できます。（初期化処理に時間がかかることがあります）
 
 ## ライセンス
