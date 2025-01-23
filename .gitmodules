@@ -1,3 +1,4 @@
 [submodule "Plugins/PLATEAU-SDK-for-Unreal"]
 	path = Plugins/PLATEAU-SDK-for-Unreal
 	url = git@github.com:Synesthesias/PLATEAU-SDK-for-Unreal.git
+	branch = dev/v3
