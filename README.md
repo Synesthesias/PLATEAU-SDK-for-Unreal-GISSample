@@ -3,7 +3,7 @@
 ## 概要
 ![](/README_Images/GISSample.png)
 
-このリポジトリでは、[PLATEAU SDK for Unreal](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal)を利用してどのようなアプリケーションを作成できるかについて知るためのチュートリアルとして、GISサンプルアプリを提供しています。GISサンプルアプリでは、PLATEAUの3D都市モデルのさまざまな属性情報の表示や、属性情報に応じたフィルタリング・色分けができます。
+このリポジトリでは、[PLATEAU SDK for Unreal](https://github.com/Project-PLATEAU/PLATEAU-SDK-for-Unreal)を利用してどのようなアプリケーションを作成できるかについて知るためのチュートリアルとして、GISサンプルアプリを提供しています。GISサンプルアプリでは、PLATEAUの3D都市モデルのさまざまな属性情報の表示や、属性情報に応じたフィルタリング・色分けができます。また、右下の歩行者アイコンをクリックすることで、歩行者視点での操作が可能となります。
 
 ## 動作環境
 - Unreal Engine 5.3.2
