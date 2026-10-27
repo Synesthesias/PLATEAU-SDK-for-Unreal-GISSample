@@ -1,0 +1,18 @@
+version: 2
+updates:
+- package-ecosystem: gitsubmodule
+  directory: /
+  schedule:
+    interval: weekly
+    day: monday
+    time: '10:00'
+    timezone: Asia/Tokyo
+  open-pull-requests-limit: 3
+  groups:
+    routine-updates:
+      patterns:
+      - '*'
+    security-updates:
+      applies-to: security-updates
+      patterns:
+      - '*'
