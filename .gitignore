@@ -68,3 +68,4 @@ LocalDerivedDataCache/*
 
 # Jetbrains
 .idea
+**/.claude/settings.local.json
